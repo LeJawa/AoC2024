@@ -40,6 +40,7 @@ const isSafe = (report: number[], part2 = false): boolean => {
       .concat(report.slice(indexToRemove + 1));
     safe = isSafe(newReport);
 
+    // If indexToRemove is second or third, we need to try removing first AND second indices as well
     if (!safe && (indexToRemove == 1 || indexToRemove == 2)) {
       safe = isSafe(report.slice(1));
       if (!safe) {
