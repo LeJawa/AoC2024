@@ -29,7 +29,6 @@ sorted1.forEach(n => {
   }
 })
 
-
 console.log(`Part 1: ${distance}`)
 console.log(`Part 2: ${similarity}`)
 
