@@ -1,6 +1,0 @@
-[submodule "input"]
-	path = input
-	url = ./input
-[submodule "answers"]
-	path = answers
-	url = ./answers
