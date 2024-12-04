@@ -16,5 +16,5 @@ file.match(/(mul\(\d{1,3},\d{1,3}\)|do\(\)|don't\(\))/g)?.forEach((match) => {
   }
 });
 
-console.log(`Part 1: ${full_multiplication_sum}`);
-console.log(`Part 2: ${conditional_multiplication_sum}`);
+console.log(`Part 1: ${full_multiplication_sum}`); // 187194524
+console.log(`Part 2: ${conditional_multiplication_sum}`); // 127092535
