@@ -72,21 +72,43 @@ function checkUpdate(update: number[]): number {
 
 // Fixes update and returns value of middle page
 function fixUpdate(update: number[]): number {
-  const updatePermutations = permutations(update, update.length);
+  let updateError = true;
 
-  let middlePage = 0;
-  updatePermutations.some((perm) => {
-    const mp = checkUpdate(perm);
-    if (mp !== 0) {
-      middlePage = mp;
-      return true;
-    }
-    return false;
-  });
+  while (updateError) {
+    updateError = false;
+    update.forEach((p, i, arr) => {
+      if (updateError) return;
 
-  console.log(`Found middle page: ${middlePage} for update: ${update}`);
-  
-  return middlePage
+      const pagesBefore = arr.slice(0, i);
+      const pagesAfter = arr.slice(i + 1);
+
+      pagesBefore.forEach((pb, j) => {
+        if (updateError) return;
+        if (pageAfterRules[p]?.includes(pb)) {
+          updateError = true;
+
+          arr[i] = pb;
+          arr[j] = p;
+          return;
+        }
+      });
+      pagesAfter.forEach((pa, k) => {
+        if (updateError) return;
+        if (pageBeforeRules[p]?.includes(pa)) {
+          updateError = true;
+          arr[i] = pa;
+          arr[i + k + 1] = p;
+          return;
+        }
+      });
+    });
+  }
+
+  const middlePage = update[Math.floor(update.length / 2)];
+
+  // console.log(`Found middle page: ${middlePage} for update: ${update}`);
+
+  return middlePage;
 }
 
 updates.forEach((update) => {
@@ -98,4 +120,4 @@ updates.forEach((update) => {
 });
 
 console.log(`Part 1: ${correctMiddlePageSum}`); // 4957
-console.log(`Part 2: ${wrongMiddlePageSum}`);
+console.log(`Part 2: ${wrongMiddlePageSum}`); // 6938
