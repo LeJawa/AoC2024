@@ -6,12 +6,27 @@
     "configurations": [
         {
             "request": "launch",
-            "name": "Deno: current",
+            "name": "Deno: current (windows)",
             "type": "node",
             "program": "${file}",
             "cwd": "${workspaceFolder}",
             "env": {},
             "runtimeExecutable": "C:\\Users\\Luis\\.deno\\bin\\deno.EXE",
+            "runtimeArgs": [
+                "run",
+                "--inspect-wait",
+                "--allow-all"
+            ],
+            "attachSimplePort": 9229
+        },
+        {
+            "request": "launch",
+            "name": "Deno: current (devcontainer)",
+            "type": "node",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "runtimeExecutable": "/usr/local/bin/deno",
             "runtimeArgs": [
                 "run",
                 "--inspect-wait",
