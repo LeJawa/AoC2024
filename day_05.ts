@@ -1,5 +1,3 @@
-import { permutations } from "./utils/combinatorics.ts";
-
 const file = Deno.readTextFileSync("input/day_05.txt");
 
 const pageAfterRules: { [x: string]: number[] } = {};
