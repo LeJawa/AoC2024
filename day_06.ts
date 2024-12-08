@@ -44,8 +44,15 @@ const getMap = (visited: Set<string>, obstacle: number[] = [-1, -1]) => {
   return map;
 };
 
-const saveMap = (filename: string, visited: Set<string>, obstacle: number[]) => {
-  Deno.writeFileSync(filename, new TextEncoder().encode(getMap(visited, obstacle)));
+const saveMap = (
+  filename: string,
+  visited: Set<string>,
+  obstacle: number[],
+) => {
+  Deno.writeFileSync(
+    filename,
+    new TextEncoder().encode(getMap(visited, obstacle)),
+  );
 };
 
 const _printMap = (visited: Set<string>) => {
@@ -120,15 +127,23 @@ const obstacles: Set<string> = new Set();
 
 let out = false;
 
-result.path.forEach((location, index, arr) => {
+Array.from(result.visitedUnique).forEach((location, index, arr) => {
   if (index === 0 || out) return;
 
   const [obstacleX, obstacleY, _] = location.split(",");
+  const obstacleString = `${obstacleX},${obstacleY}`;
+  if (
+    obstacles.has(obstacleString) ||
+    (parseInt(obstacleX) == x0 && parseInt(obstacleY) == y0)
+  ) {
+    return;
+  }
+
   const [x, y, dir] = arr[index - 1].split(",");
 
   // const result = findPath(parseInt(x), parseInt(y), dir, [
-    const result = findPath(x0, y0, "up", [
-      parseInt(obstacleX),
+  const result = findPath(x0, y0, "up", [
+    parseInt(obstacleX),
     parseInt(obstacleY),
   ]);
   if (result.loop) {
@@ -138,8 +153,11 @@ result.path.forEach((location, index, arr) => {
         (index * 100 / arr.length).toFixed(1)
       }%) Found ${numberOfLoops} loops: latest obstacle location -> (${obstacleX}, ${obstacleY})`,
     );
-    obstacles.add(`${obstacleX},${obstacleY}`);
-    saveMap(`./out/${numberOfLoops}.txt`, result.visitedUnique, [parseInt(obstacleX), parseInt(obstacleY)])
+    obstacles.add(obstacleString);
+    // saveMap(`./out/${numberOfLoops}.txt`, result.visitedUnique, [
+    //   parseInt(obstacleX),
+    //   parseInt(obstacleY),
+    // ]);
     // out = true;
     // console.log(result.path);
     // console.log(result.visitedUnique);
