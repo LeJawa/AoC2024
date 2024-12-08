@@ -17,18 +17,21 @@ const nextDir = (dir: string) => {
   return "up";
 };
 
-const printMap = (visited: { [location: string]: boolean }) => {
+const getMap = (visited: Set<string>, obstacle: number[] = [-1, -1]) => {
   const visited_indices: number[] = [];
-  Object.keys(visited).forEach((location) => {
+  visited.forEach((location) => {
     const [x, y] = location.split(",").map((x) => parseInt(x));
     visited_indices.push(x + y * size);
   });
+  const obstacleIndex = obstacle[0] + obstacle[1] * size;
 
   let map = "";
   let x = 0;
   Array.from(fullMap).forEach((location, index) => {
     if (visited_indices.includes(index)) {
       map += "X";
+    } else if (index === obstacleIndex) {
+      map += "O";
     } else {
       map += location;
     }
@@ -38,7 +41,15 @@ const printMap = (visited: { [location: string]: boolean }) => {
     }
   });
 
-  console.log(map);
+  return map;
+};
+
+const saveMap = (filename: string, visited: Set<string>, obstacle: number[]) => {
+  Deno.writeFileSync(filename, new TextEncoder().encode(getMap(visited, obstacle)));
+};
+
+const _printMap = (visited: Set<string>) => {
+  console.log(getMap(visited));
 };
 
 const findPath = (
@@ -47,7 +58,7 @@ const findPath = (
   direction: string,
   obstacleLocation: number[] = [],
 ) => {
-  const visitedUnique: { [location: string]: boolean } = {};
+  const visitedUnique: Set<string> = new Set();
   const path: string[] = [];
 
   let currentDir = direction;
@@ -70,7 +81,7 @@ const findPath = (
       };
     }
 
-    visitedUnique[`${x},${y}`] = true;
+    visitedUnique.add(`${x},${y}`);
     path.push(locationDir);
 
     let deltaX = 0, deltaY = 0;
@@ -102,10 +113,10 @@ const findPath = (
 
 // printMap(visitedUnique);
 const result = findPath(x0, y0, "up");
-const uniqueLocations = Object.keys(result.visitedUnique).length;
+const uniqueLocations = result.visitedUnique.size;
 
 let numberOfLoops = 0;
-const obstacles: { [location: string]: boolean } = {};
+const obstacles: Set<string> = new Set();
 
 let out = false;
 
@@ -115,8 +126,9 @@ result.path.forEach((location, index, arr) => {
   const [obstacleX, obstacleY, _] = location.split(",");
   const [x, y, dir] = arr[index - 1].split(",");
 
-  const result = findPath(parseInt(x), parseInt(y), dir, [
-    parseInt(obstacleX),
+  // const result = findPath(parseInt(x), parseInt(y), dir, [
+    const result = findPath(x0, y0, "up", [
+      parseInt(obstacleX),
     parseInt(obstacleY),
   ]);
   if (result.loop) {
@@ -126,15 +138,14 @@ result.path.forEach((location, index, arr) => {
         (index * 100 / arr.length).toFixed(1)
       }%) Found ${numberOfLoops} loops: latest obstacle location -> (${obstacleX}, ${obstacleY})`,
     );
-    obstacles[`${obstacleX},${obstacleY}`] = true;
-
-    // printMap(result.visitedUnique);
-    
+    obstacles.add(`${obstacleX},${obstacleY}`);
+    saveMap(`./out/${numberOfLoops}.txt`, result.visitedUnique, [parseInt(obstacleX), parseInt(obstacleY)])
     // out = true;
     // console.log(result.path);
     // console.log(result.visitedUnique);
   }
 });
+_printMap(result.visitedUnique);
 
 console.log(`Part 1: ${uniqueLocations}`); // 5153
-console.log(`Part 2: ${Object.keys(obstacles).length}`);
+console.log(`Part 2: ${obstacles.size}`);

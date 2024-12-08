@@ -5,10 +5,6 @@ const file = Deno.readTextFileSync("input/day_08.txt");
 const fullMap = file.replaceAll("\n", "");
 const size = Math.sqrt(fullMap.length);
 
-const get = (x: number, y: number) => {
-    return fullMap[y * size + x];
-};
-
 const getCoord = (index: number) => {
     return [index % size, Math.trunc(index / size)];
 };

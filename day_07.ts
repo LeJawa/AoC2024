@@ -23,6 +23,7 @@ const operationCheck = (
 
 const checkPermutations = (
     numbers: number[],
+    
     permutations: Generator<string[], any, any>,
     target: number,
 ) => {
