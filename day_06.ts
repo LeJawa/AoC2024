@@ -1,3 +1,5 @@
+const t0 = performance.now();
+
 const file = Deno.readTextFileSync("input/day_06.txt");
 
 const fullMap = file.replaceAll("\n", "");
@@ -117,10 +119,12 @@ const findPath = (
     visitedUnique: visitedUnique,
   };
 };
+const t1 = performance.now();
 
 // printMap(visitedUnique);
 const result = findPath(x0, y0, "up");
 const uniqueLocations = result.visitedUnique.size;
+const t2 = performance.now();
 
 const findObstacles = (path: string[]) => {
   // let numberOfLoops = 0;
@@ -166,8 +170,14 @@ const findObstacles = (path: string[]) => {
 };
 
 const obstacles = findObstacles(result.path);
+const t3 = performance.now();
 
 // _printMap(result.visitedUnique);
 
 console.log(`Part 1: ${uniqueLocations}`); // 5153
-console.log(`Part 2: ${obstacles.size}`); // 1711 (quite long)
+console.log(`Part 2: ${obstacles.size}`); // 1711 (quite long ~ 20s)
+
+console.log(`Start up took ${(t1 - t0).toFixed(3)} ms.`);
+console.log(`Part 1 took ${(t2 - t1).toFixed(3)} ms.`);
+console.log(`Part 2 took ${((t3 - t2) / 1000).toFixed(3)} s.`);
+console.log(`Total took ${((t3 - t0) / 1000).toFixed(3)} s.`);
