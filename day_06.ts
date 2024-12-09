@@ -44,7 +44,7 @@ const getMap = (visited: Set<string>, obstacle: number[] = [-1, -1]) => {
   return map;
 };
 
-const saveMap = (
+const _saveMap = (
   filename: string,
   visited: Set<string>,
   obstacle: number[],
@@ -98,7 +98,7 @@ const findPath = (
     else if (currentDir === "left") deltaX = -1;
 
     if (
-      get(x + deltaX, y + deltaY) === "#" ||
+      ((x + deltaX) < size && get(x + deltaX, y + deltaY) === "#") ||
       (placeObstacle && x + deltaX === obstacleLocation[0] &&
         y + deltaY === obstacleLocation[1])
     ) {
@@ -122,48 +122,52 @@ const findPath = (
 const result = findPath(x0, y0, "up");
 const uniqueLocations = result.visitedUnique.size;
 
-let numberOfLoops = 0;
-const obstacles: Set<string> = new Set();
+const findObstacles = (path: string[]) => {
+  // let numberOfLoops = 0;
+  const obstacles: Set<string> = new Set();
+  const visited: Set<string> = new Set();
 
-let out = false;
+  path.forEach((location, index, arr) => {
+    const [obstacleX, obstacleY, _] = location.split(",");
+    const obstacleString = `${obstacleX},${obstacleY}`;
 
-Array.from(result.visitedUnique).forEach((location, index, arr) => {
-  if (index === 0 || out) return;
+    if (
+      visited.has(obstacleString) ||
+      (parseInt(obstacleX) == x0 && parseInt(obstacleY) == y0)
+    ) {
+      return;
+    }
+    visited.add(obstacleString);
 
-  const [obstacleX, obstacleY, _] = location.split(",");
-  const obstacleString = `${obstacleX},${obstacleY}`;
-  if (
-    obstacles.has(obstacleString) ||
-    (parseInt(obstacleX) == x0 && parseInt(obstacleY) == y0)
-  ) {
-    return;
-  }
+    const [x, y, dir] = arr[index - 1].split(",");
 
-  const [x, y, dir] = arr[index - 1].split(",");
+    const result = findPath(parseInt(x), parseInt(y), dir, [
+      parseInt(obstacleX),
+      parseInt(obstacleY),
+    ]);
+    if (result.loop) {
+      // numberOfLoops++;
+      // console.log(
+      //   `(${
+      //     (index * 100 / arr.length).toFixed(1)
+      //   }%) Found ${numberOfLoops} loops: latest obstacle location -> (${obstacleX}, ${obstacleY})`,
+      // );
+      obstacles.add(obstacleString);
+      // saveMap(`./out/${numberOfLoops}.txt`, result.visitedUnique, [
+      //   parseInt(obstacleX),
+      //   parseInt(obstacleY),
+      // ]);
+      // console.log(result.path);
+      // console.log(result.visitedUnique);
+    }
+  });
 
-  // const result = findPath(parseInt(x), parseInt(y), dir, [
-  const result = findPath(x0, y0, "up", [
-    parseInt(obstacleX),
-    parseInt(obstacleY),
-  ]);
-  if (result.loop) {
-    numberOfLoops++;
-    console.log(
-      `(${
-        (index * 100 / arr.length).toFixed(1)
-      }%) Found ${numberOfLoops} loops: latest obstacle location -> (${obstacleX}, ${obstacleY})`,
-    );
-    obstacles.add(obstacleString);
-    // saveMap(`./out/${numberOfLoops}.txt`, result.visitedUnique, [
-    //   parseInt(obstacleX),
-    //   parseInt(obstacleY),
-    // ]);
-    // out = true;
-    // console.log(result.path);
-    // console.log(result.visitedUnique);
-  }
-});
-_printMap(result.visitedUnique);
+  return obstacles;
+};
+
+const obstacles = findObstacles(result.path);
+
+// _printMap(result.visitedUnique);
 
 console.log(`Part 1: ${uniqueLocations}`); // 5153
-console.log(`Part 2: ${obstacles.size}`);
+console.log(`Part 2: ${obstacles.size}`); // 1711 (quite long)
