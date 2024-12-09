@@ -1,3 +1,4 @@
+const t0 = performance.now();
 const file = Deno.readTextFileSync("input/day_09.txt");
 
 let actualFile = file;
@@ -84,6 +85,10 @@ const calculatePart2Checksum = (file: string) => {
 
       if (
         !availableSpaces.some(([startEmptyIndex, emptySize], i, arr) => {
+          if (startEmptyIndex > startFileIndex) {
+            return false;
+          }
+
           if (size <= emptySize) {
             let spaceToAllocate = size;
             let memoryIndex = startEmptyIndex;
@@ -113,8 +118,16 @@ const calculatePart2Checksum = (file: string) => {
   return checksum;
 };
 
+const t1 = performance.now();
 const part1Checksum = calculatePart1Checksum(actualFile);
+const t2 = performance.now();
 const part2Checksum = calculatePart2Checksum(actualFile);
+const t3 = performance.now();
 
 console.log(`Part 1: ${part1Checksum}`); // 6346871685398
-console.log(`Part 2: ${part2Checksum}`); // 8546756871770 too high
+console.log(`Part 2: ${part2Checksum}`); // 6373055193464
+
+console.log(`Start up took ${(t1 - t0).toFixed(3)} milliseconds.`);
+console.log(`Part 1 took ${(t2 - t1).toFixed(3)} milliseconds.`);
+console.log(`Part 2 took ${(t3 - t2).toFixed(3)} milliseconds.`);
+console.log(`Total took ${(t3 - t0).toFixed(3)} milliseconds.`);
