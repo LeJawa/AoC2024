@@ -170,7 +170,7 @@ const part2 = calculatePart2();
 const t3 = performance.now();
 
 console.log(`Part 1: ${part1}`); // 1549354
-console.log(`Part 2: ${part2}`); //
+console.log(`Part 2: ${part2}`); // 937032
 
 console.log(`Start up took ${(t1 - t0).toFixed(3)} milliseconds.`);
 console.log(`Part 1 took ${(t2 - t1).toFixed(3)} milliseconds.`);
