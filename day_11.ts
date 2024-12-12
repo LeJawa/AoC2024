@@ -60,7 +60,7 @@ const part1DoNBlinks = (stones: number[], n: number) => {
 
   return Object.keys(stoneDict).reduce((prev, curr) => {
     return prev += stoneDict[curr];
-  });
+  }, 0);
 };
 
 const calculatePart1 = (stones: number[]) => {
@@ -75,14 +75,14 @@ const calculatePart2 = (stones: number[]) => {
 
 const t1 = performance.now();
 const part1Stones = calculatePart1(startingStones.slice());
-const part1 = part1Stones.length;
+const part1 = part1Stones;
 const t2 = performance.now();
 const part2Stones = calculatePart2(startingStones.slice());
-const part2 = part2Stones.length;
+const part2 = part2Stones;
 const t3 = performance.now();
 
 console.log(`Part 1: ${part1}`); // 231278
-console.log(`Part 2: ${part2}`); //
+console.log(`Part 2: ${part2}`); // 274229228071551
 
 console.log(`Start up took ${(t1 - t0).toFixed(3)} milliseconds.`);
 console.log(`Part 1 took ${(t2 - t1).toFixed(3)} milliseconds.`);
