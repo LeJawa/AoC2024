@@ -36,6 +36,21 @@
         },
         {
             "request": "launch",
+            "name": "Deno: current (linux)",
+            "type": "node",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "runtimeExecutable": "/home/luis/.deno/bin/deno",
+            "runtimeArgs": [
+                "run",
+                "--inspect-wait",
+                "--allow-all"
+            ],
+            "attachSimplePort": 9229
+        },
+        {
+            "request": "launch",
             "name": "Deno: main",
             "type": "node",
             "program": "${workspaceFolder}/main.ts",
