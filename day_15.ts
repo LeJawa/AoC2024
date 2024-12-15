@@ -76,9 +76,60 @@ const checkNextPosPart1 = (
 const checkNextPosPart2 = (
   [x, y]: number[],
   dir: number[],
-  map: string[][]
+  map: string[][],
+  neighbourChecked = false
 ) => {
   if (map[y + dir[1]][x + dir[0]] === "#") return false;
+
+  const advance = ([x, y]: number[], dir: number[], map: string[][]) => {
+    if (map[y][x] === ".") return true;
+    map[y + dir[1]][x + dir[0]] = map[y][x];
+    map[y][x] = ".";
+    return true;
+  };
+  const currentCell = map[y][x];
+  if (map[y + dir[1]][x + dir[0]] === ".") {
+    if (dir[1] === 0) return advance([x, y], dir, map);
+    if (currentCell === "@") {
+      return advance([x, y], dir, map);
+    }
+    // if (currentCell === "[" && ) {
+    if (currentCell === "[") {
+      if (map[y + dir[1]][x + 1] === ".") {
+        advance([x + 1, y], dir, map);
+        return advance([x, y], dir, map);
+      } else if (checkNextPosPart2([x + 1, y], dir, map, true)) {
+        advance([x + 1, y], dir, map);
+        return advance([x, y], dir, map);
+      }
+    }
+    if (currentCell === "]") {
+      if (map[y + dir[1]][x - 1] === ".") {
+        advance([x - 1, y], dir, map);
+        return advance([x, y], dir, map);
+      } else if (checkNextPosPart2([x - 1, y], dir, map, true)) {
+        advance([x - 1, y], dir, map);
+        return advance([x, y], dir, map);
+      }
+    }
+    if (currentCell === "]" && checkNextPosPart2([x - 1, y], dir, map, true)) {
+      advance([x - 1, y], dir, map);
+      return advance([x, y], dir, map);
+    }
+  }
+
+  const checkFront = checkNextPosPart2([x + dir[0], y + dir[1]], dir, map);
+  if (!checkFront) return false;
+  if (dir[1] === 0) return advance([x, y], dir, map);
+
+  if (!neighbourChecked) {
+    if (map[y][x] === "[" && checkNextPosPart2([x + 1, y], dir, map, true))
+      return advance([x, y], dir, map);
+
+    if (map[y][x] === "]" && checkNextPosPart2([x - 1, y], dir, map, true))
+      return advance([x, y], dir, map);
+  }
+  return advance([x, y], dir, map);
 };
 
 const moveRobotPart1 = (
@@ -146,12 +197,15 @@ const calculatePart1 = () => {
 const calculatePart2 = () => {
   printMap(secondMap);
   let robotPosition = getStartingPosition(secondMap);
+  let step = 1;
   instructions.forEach((inst) => {
-    // console.log(inst);
+    console.log(step, inst);
+    // breaks at step 240 with problem input
     robotPosition = moveRobotPart2(robotPosition, inst as Direction, secondMap);
-    // printMap(secondMap);
+    printMap(secondMap);
+    step++;
   });
-
+  printMap(secondMap);
   const gpsSum = getGPSSum(secondMap);
   return gpsSum;
 };
