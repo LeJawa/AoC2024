@@ -94,33 +94,90 @@ const printMap = (map: string[][]) => {
 // east: 0, south: 1, west: 2, north: 3
 const traceBackPath = (
   startString: string,
+  endx: number,
+  endy: number,
   floodResult: { [xy: string]: number },
   map: string[][],
 ) => {
   const findPositionStrings = (
     x: number,
     y: number,
+    prevDir: number,
     floodFillResult: { [xy: string]: number },
   ) => {
     const options: string[] = [];
+    let lowestCost = Infinity;
     Object.keys(floodFillResult).forEach((positionString) => {
-      if (`${x},${y}` === positionString.slice(0, -2)) {
+      const [xs, ys, dirs] = positionString.split(",");
+      if (x === parseInt(xs) && y === parseInt(ys)) {
         options.push(positionString);
+        if (
+          floodFillResult[positionString] +
+              rotationCost(prevDir, parseInt(dirs)) < lowestCost
+        ) {
+          lowestCost = floodFillResult[positionString] +
+            rotationCost(prevDir, parseInt(dirs));
+        }
       }
     });
-    return options;
+
+    return options.filter((posString) => {
+      const [_x, _y, dir] = posString.split(",");
+
+      return floodFillResult[posString] +
+          rotationCost(prevDir, parseInt(dir)) === lowestCost;
+    });
   };
 
-  const [xs, ys, dir] = startString.split(",").map((x) => parseInt(x));
-  if (dir === 0) {
-    const options = findPositionStrings(xs, ys, floodFillResult);
+  const positionStrings: string[] = [startString];
+
+  const positionSet = new Set();
+  while (positionStrings.length > 0) {
+    const posString = positionStrings.pop()!;
+
+    if (positionSet.has(posString)) continue;
+
+    positionSet.add(posString);
+
+    const [x, y, dir] = posString.split(",").map((x) => parseInt(x));
+
+    if (x === endx && y === endy) continue;
+
+    map[y][x] = "O";
+    if (dir === 0) {
+      const options = findPositionStrings(x - 1, y, dir, floodResult);
+      positionStrings.push(...options);
+    } else if (dir === 1) {
+      const options = findPositionStrings(x, y - 1, dir, floodResult);
+      positionStrings.push(...options);
+    } else if (dir === 2) {
+      const options = findPositionStrings(x + 1, y, dir, floodResult);
+      positionStrings.push(...options);
+    } else if (dir === 3) {
+      const options = findPositionStrings(x, y + 1, dir, floodResult);
+      positionStrings.push(...options);
+    }
   }
 };
 
-const calculatePart1 = () => {
-  const [start, end] = getStartEndPositions(map);
-  const floodFillResult = floodFill(start, end, map);
+const [start, end] = getStartEndPositions(map);
+const floodFillResult: { [xy: string]: number } = floodFill(start, end, map);
 
+const calculatePart1 = () => {
+  const endString = `${end[0]},${end[1]}`;
+  let bestEndingCost = Infinity;
+  Object.keys(floodFillResult).forEach((positionString) => {
+    if (endString === positionString.slice(0, -2)) {
+      if (bestEndingCost > floodFillResult[positionString]) {
+        bestEndingCost = floodFillResult[positionString];
+      }
+    }
+  });
+
+  return bestEndingCost;
+};
+
+const calculatePart2 = () => {
   const endString = `${end[0]},${end[1]}`;
   let bestEndingCost = Infinity;
   const bestEndStrings: string[] = [];
@@ -136,15 +193,18 @@ const calculatePart1 = () => {
   bestEndStrings.forEach((positionString) => {
     if (floodFillResult[positionString] !== bestEndingCost) return;
 
-    traceBackPath(positionString, floodFillResult, map);
+    traceBackPath(positionString, start[0], start[1], floodFillResult, map);
   });
+  // printMap(map);
 
-  printMap(map);
+  let tiles = 0;
+  map.forEach((row) =>
+    row.forEach((cell) => {
+      if (cell === "O" || cell === "S") tiles++;
+    })
+  );
 
-  return bestEndingCost;
-};
-
-const calculatePart2 = () => {
+  return tiles;
 };
 
 const t1 = performance.now();
@@ -154,7 +214,7 @@ const part2 = calculatePart2();
 const t3 = performance.now();
 
 console.log(`Part 1: ${part1}`); // 98416
-console.log(`Part 2: ${part2}`); //
+console.log(`Part 2: ${part2}`); // 471
 
 console.log(`Start up took ${(t1 - t0).toFixed(3)} milliseconds.`);
 console.log(`Part 1 took ${(t2 - t1).toFixed(3)} milliseconds.`);
