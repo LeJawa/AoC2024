@@ -6,60 +6,60 @@ const [_, rawa, rawb, rawc, rawInst] = file.match(
 )!;
 const inst = rawInst.split(",").map((x) => parseInt(x));
 
-let a = parseInt(rawa);
-let b = parseInt(rawb);
-let c = parseInt(rawc);
+let a = BigInt(parseInt(rawa));
+let b = BigInt(parseInt(rawb));
+let c = BigInt(parseInt(rawc));
 
 const combo = (x: number) => {
-  if (x < 4) return x;
+  if (x < 4) return BigInt(x);
   if (x == 4) return a;
   if (x == 5) return b;
   if (x == 6) return c;
-  return -1;
+  throw new Error("Combo is 7");
 };
 
 let terminal: number[] = [];
 
 const adv = (x: number) => {
-  a = Math.trunc(a / (2 ** combo(x)));
+  a = a / (2n ** combo(x));
   return 2;
 };
 const bdv = (x: number) => {
-  b = Math.trunc(a / (2 ** combo(x)));
+  b = a / (2n ** combo(x));
   return 2;
 };
 const cdv = (x: number) => {
-  c = Math.trunc(a / (2 ** combo(x)));
+  c = a / (2n ** combo(x));
   return 2;
 };
 const bxl = (x: number) => {
-  b = b ^ x;
+  b = b ^ BigInt(x);
   return 2;
 };
 const bst = (x: number) => {
-  b = combo(x) % 8;
+  b = combo(x) % 8n;
   return 2;
 };
 const jnz = (x: number) => {
-  if (a === 0) return 2;
-  return x;
+  if (a === 0n) return 2;
+  return Number(x);
 };
 const bxc = (_x: number) => {
   b = b ^ c;
   return 2;
 };
 const out = (x: number) => {
-  terminal.push(combo(x) % 8);
+  terminal.push(Number(combo(x) % 8n));
   return 2;
 };
 
 const instFunctions = [adv, bxl, bst, jnz, bxc, out, bdv, cdv];
 
 const doInst = (index: number) => {
-  const opcode = inst[index];
+  const opcode = Number(inst[index]);
 
   if (opcode === 3) {
-    if (a === 0) return index + 2;
+    if (a === 0n) return index + 2;
     return inst[index + 1];
   }
 
@@ -76,39 +76,57 @@ const calculatePart1 = () => {
   return terminal.join(",");
 };
 
-const calculatePart2 = () => {
+const bruteForcePart2 = () => {
+  const final: string[] = [];
   terminal = [];
   let output = terminal.join(",");
-  let aStart = 50118712000000;
-
-  while (output !== rawInst) {
+  let aStart = 16777216n;
+  let loop =0
+  while (output !== rawInst && loop++ < 100 ) {
     a = ++aStart;
-    b = 0;
-    c = 0;
+    b = 0n;
+    c = 0n;
     terminal = [];
     let index = 0;
     while (index >= 0 && index < inst.length - 1) {
       index = doInst(index);
-      if (terminal.some((x) => x < 0)) break;
-      if (!terminal.every((x, i) => x !== 7 || i % 2 === 1)) break;
+      // if (!terminal.every((x, i) => x !== 7 || i % 2 === 0)) continue;
     }
-    if (terminal.length === inst.length) {
-      output = terminal.join(",");
-      // console.log(output);
-    }
+    // if (terminal.length === inst.length) {
+    output = terminal.join(",");
+    //   console.log(output);
+    // }
+    final.push(aStart + ":  " + output);
   }
 
+  Deno.writeFileSync(
+    "out/test17.txt",
+    new TextEncoder().encode(final.join("\n")),
+  );
   return aStart;
 };
 
+const calculatePart2 = () => {
+  let result = 0;
+
+  inst.forEach((v, i) => {
+    result += v * 8 ** (i+1);
+  });
+
+  bruteForcePart2()
+
+  return result;
+};
+
 const t1 = performance.now();
-const part1 = calculatePart1();
+// const part1 = calculatePart1();
+const part1 = 0
 const t2 = performance.now();
 const part2 = calculatePart2();
 const t3 = performance.now();
 
 console.log(`Part 1: ${part1}`); //
-console.log(`Part 2: ${part2}`); //
+console.log(`Part 2: ${part2}`); // 130647579931408 is too low
 
 console.log(`Start up took ${(t1 - t0).toFixed(3)} milliseconds.`);
 console.log(`Part 1 took ${(t2 - t1).toFixed(3)} milliseconds.`);
