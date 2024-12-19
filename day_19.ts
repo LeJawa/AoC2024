@@ -26,33 +26,32 @@ towels.forEach((towel) => {
   towelDict[letter].push(towel);
 });
 
-const possiblePatternCombinations = (patterns: string[], towels: string[]) => {
-  let totalCombinations = 0;
+const knownCombinations: { [pattern: string]: number } = {};
 
-  patterns.forEach((pattern) => {
-    let combinations = 0;
-    const queue: string[] = [pattern];
+const recursiveFind = (pattern: string) => {
+  if (pattern === "") return 1;
 
-    while (queue.length > 0) {
-      const subpattern = queue.pop()!;
+  if (knownCombinations[pattern] !== undefined) {
+    return knownCombinations[pattern];
+  }
 
-      if (subpattern === "") {
-        combinations++;
-        continue;
-      }
+  let combinations = 0;
 
-      towelDict[subpattern[0]].forEach((towel) => {
-        if (subpattern.startsWith(towel)) {
-          queue.push(subpattern.slice(towel.length));
+  towelDict[pattern[0]].forEach((towel) => {
+    if (pattern.startsWith(towel)) {
+      const subcombinations = recursiveFind(pattern.slice(towel.length));
+
+      if (subcombinations > 0) {
+        if (knownCombinations[pattern] === undefined) {
+          knownCombinations[pattern] = 0;
         }
-      });
+        knownCombinations[pattern] += subcombinations;
+      }
+      combinations += subcombinations;
     }
-
-    console.log(`Pattern ${pattern}: ${combinations}`);
-    totalCombinations += combinations;
   });
 
-  return totalCombinations;
+  return combinations;
 };
 
 const calculatePart1 = () => {
@@ -62,11 +61,13 @@ const calculatePart1 = () => {
 };
 
 const calculatePart2 = () => {
-  const possible = possiblePatternCombinations(
-    possiblePatternsRegex(patterns, towels),
-    towels,
-  );
-  return possible;
+  let combinations = 0;
+
+  patterns.forEach((pattern) => {
+    combinations += recursiveFind(pattern);
+  });
+
+  return combinations;
 };
 
 const t1 = performance.now();
@@ -76,7 +77,7 @@ const part2 = calculatePart2();
 const t3 = performance.now();
 
 console.log(`Part 1: ${part1}`); // 242
-console.log(`Part 2: ${part2}`); //
+console.log(`Part 2: ${part2}`); // 595975512785325
 
 console.log(`Start up took ${(t1 - t0).toFixed(3)} milliseconds.`);
 console.log(`Part 1 took ${(t2 - t1).toFixed(3)} milliseconds.`);
