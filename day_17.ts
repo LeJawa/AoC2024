@@ -2,7 +2,7 @@ const t0 = performance.now();
 const file = Deno.readTextFileSync("input/day_17.txt");
 
 const [_, rawa, rawb, rawc, rawInst] = file.match(
-  /^Register A: (\d+)\WRegister B: (\d+)\WRegister C: (\d+)\W+Program: ([\d,]+)$/,
+  /^Register A\: (\d+)\WRegister B\: (\d+)\WRegister C\: (\d+)\W+Program\: ([\d,]+)$/,
 )!;
 const inst = rawInst.split(",").map((x) => parseInt(x));
 
@@ -48,6 +48,7 @@ const bxc = (_x: number) => {
   b = b ^ c;
   return 2;
 };
+
 const out = (x: number) => {
   terminal.push(Number(combo(x) % 8n));
   return 2;
@@ -66,37 +67,48 @@ const doInst = (index: number) => {
   return index + instFunctions[opcode](inst[index + 1]);
 };
 
-const calculatePart1 = () => {
+const runAllInst = (aStart: number = Number(a)) => {
+  a = BigInt(aStart);
+  b = 0n;
+  c = 0n;
   let index = 0;
   terminal = [];
   while (index >= 0 && index < inst.length - 1) {
     index = doInst(index);
   }
 
-  return terminal.join(",");
+  return terminal;
+};
+
+const calculatePart1 = () => {
+  return runAllInst().join(",");
 };
 
 const bruteForcePart2 = () => {
   const final: string[] = [];
   terminal = [];
   let output = terminal.join(",");
-  let aStart = 16777216n;
-  let loop =0
-  while (output !== rawInst && loop++ < 100 ) {
-    a = ++aStart;
+  let aStart = 1;
+  let loop = 0;
+  while (output !== rawInst && loop++ < 10000) {
+    a = BigInt(aStart);
     b = 0n;
     c = 0n;
     terminal = [];
     let index = 0;
     while (index >= 0 && index < inst.length - 1) {
       index = doInst(index);
-      // if (!terminal.every((x, i) => x !== 7 || i % 2 === 0)) continue;
+      // if (
+      //   terminal.length > 0 &&
+      //   terminal[terminal.length - 1] !== inst[terminal.length - 1]
+      // ) break;
     }
-    // if (terminal.length === inst.length) {
+    // if (terminal.length >= inst.length - 3) {
     output = terminal.join(",");
-    //   console.log(output);
+    // console.log(output);
     // }
-    final.push(aStart + ":  " + output);
+    final.push(`${aStart} (${aStart.toString(2)}): ${output}`);
+    aStart += 1;
   }
 
   Deno.writeFileSync(
@@ -109,23 +121,17 @@ const bruteForcePart2 = () => {
 const calculatePart2 = () => {
   let result = 0;
 
-  inst.forEach((v, i) => {
-    result += v * 8 ** (i+1);
-  });
-
-  bruteForcePart2()
-
+  bruteForcePart2();
   return result;
 };
 
 const t1 = performance.now();
-// const part1 = calculatePart1();
-const part1 = 0
+const part1 = calculatePart1();
 const t2 = performance.now();
 const part2 = calculatePart2();
 const t3 = performance.now();
 
-console.log(`Part 1: ${part1}`); //
+console.log(`Part 1: ${part1}`); // 1,7,6,5,1,0,5,0,7
 console.log(`Part 2: ${part2}`); // 130647579931408 is too low
 
 console.log(`Start up took ${(t1 - t0).toFixed(3)} milliseconds.`);
