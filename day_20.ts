@@ -143,30 +143,29 @@ const calculatePart1 = () => {
   return cheats;
 };
 
-const manhattanDistance = (index1: number, index2: number) => {
-  const x1 = index1 % size;
-  const y1 = Math.trunc(index1 / size);
-  const x2 = index2 % size;
-  const y2 = Math.trunc(index2 / size);
-
-  return Math.abs(x2 - x1) + Math.abs(y2 - y1);
-};
-
 const getNumberOfCheats = (cheatLength: number) => {
   let cheats = 0;
 
   for (let i = 0; i < path.length - 1; i++) {
-    const from = path[i];
+    const xfrom = path[i] % size;
+    const yfrom = Math.trunc(path[i] / size);
     for (let j = i + 1; j < path.length; j++) {
-      const to = path[j];
+      const xto = path[j] % size;
+      const deltaX = Math.abs(xto - xfrom);
+      if (deltaX > cheatLength) continue;
 
-      const manDistance = manhattanDistance(from, to);
+      const yto = Math.trunc(path[j] / size);
+      const deltaY = Math.abs(yto - yfrom);
+      if (deltaY > cheatLength) continue;
+
+      const manhattanDistance = deltaX + deltaY;
       if (
-        distances[to] - distances[from] - Math.min(manDistance, cheatLength) <
-          limit
-      ) continue;
+        manhattanDistance > cheatLength ||
+        distances[path[j]] - distances[path[i]] - manhattanDistance < limit
+      ) {
+        continue;
+      }
 
-      if (manDistance > cheatLength) continue;
       // console.log(`From (${from% size}, ${Math.trunc(from/ size)}) to (${to% size}, ${Math.trunc(to/ size)}): ${distances[to] - distances[from]}`);
 
       cheats++;
