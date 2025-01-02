@@ -41,6 +41,7 @@ const bst = (x: number) => {
   return 2;
 };
 const jnz = (x: number) => {
+  // Not actually used, implemented in doInst
   if (a === 0n) return 2;
   return Number(x);
 };
@@ -84,7 +85,7 @@ const calculatePart1 = () => {
   return runAllInst().join(",");
 };
 
-const bruteForcePart2 = () => {
+const _bruteForcePart2 = () => {
   const final: string[] = [];
   terminal = [];
   let output = terminal.join(",");
@@ -118,11 +119,55 @@ const bruteForcePart2 = () => {
   return aStart;
 };
 
-const calculatePart2 = () => {
-  let result = 0;
+const getPossibilities = (seed: bigint, target: number) => {
+  const base = seed * 8n;
 
-  bruteForcePart2();
-  return result;
+  const possibilities: bigint[] = [];
+
+  for (let k = 0; k < 8; k++) {
+    const test = base + BigInt(k);
+
+    a = base + BigInt(k);
+    b = 0n;
+    c = 0n;
+    let index = 0;
+    terminal = [];
+    while (index < inst.length - 3) {
+      index = doInst(index);
+    }
+
+    if (terminal[0] === target) {
+      possibilities.push(test);
+    }
+  }
+
+  return possibilities;
+};
+
+type Test = [bigint, number];
+
+const calculatePart2 = () => {
+  const toCheck: Test[] = [[0n, 0]];
+
+  const answers = [];
+
+  while (toCheck.length > 0) {
+    const [current, index] = toCheck.pop()!;
+
+    if (index === inst.length) {
+      answers.push(Number(current));
+    }
+
+    const possibilities = getPossibilities(
+      current,
+      inst[inst.length - 1 - index],
+    );
+
+    const next = possibilities.map((n) => [n, index + 1]) as Test[];
+    toCheck.push(...next);
+  }
+
+  return Math.min(...answers);
 };
 
 const t1 = performance.now();
@@ -132,7 +177,7 @@ const part2 = calculatePart2();
 const t3 = performance.now();
 
 console.log(`Part 1: ${part1}`); // 1,7,6,5,1,0,5,0,7
-console.log(`Part 2: ${part2}`); // 130647579931408 is too low
+console.log(`Part 2: ${part2}`); // 236555995274861
 
 console.log(`Start up took ${(t1 - t0).toFixed(3)} milliseconds.`);
 console.log(`Part 1 took ${(t2 - t1).toFixed(3)} milliseconds.`);
